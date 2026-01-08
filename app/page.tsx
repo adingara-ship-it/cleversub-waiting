@@ -1,6 +1,12 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 const services = [
   { name: "Netflix", emoji: "🍿" },
@@ -23,18 +29,43 @@ const services = [
 export default function Home() {
   const marqueeList = [...services, ...services];
 
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error" | "duplicate"
+  >("idle");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStatus("loading");
+
+    const { error } = await supabase
+      .from("waiting_list")
+      .insert([{ email }]);
+
+    if (error) {
+      if (error.code === "23505") {
+        setStatus("duplicate"); // email déjà présent (unique constraint)
+      } else {
+        setStatus("error");
+      }
+      return;
+    }
+
+    setStatus("success");
+    setEmail("");
+  };
+
   return (
     <div className="flex-grow flex flex-col justify-center items-center overflow-hidden">
-       
-       {/* Marquee - Légèrement plus compact pour ne pas dominer l'écran */}
-       <div className="w-full max-w-full mb-8 md:mb-12 relative fade-sides">
+      {/* Marquee */}
+      <div className="w-full max-w-full mb-8 md:mb-12 relative fade-sides">
         <div className="marquee-track flex gap-4 md:gap-8 w-max">
           {marqueeList.map((service, index) => (
             <div key={index} className="logo-card group">
               <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl mb-2 md:mb-4 flex items-center justify-center bg-[#FFFFFF] border border-gray-100 shadow-sm">
-                 <span className="text-xl md:text-4xl">
-                   {service.emoji}
-                 </span>
+                <span className="text-xl md:text-4xl">
+                  {service.emoji}
+                </span>
               </div>
               <span className="text-[9px] md:text-[12px] font-bold uppercase tracking-widest text-gray-400">
                 {service.name}
@@ -44,7 +75,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Conteneur de texte centré */}
+      {/* Texte */}
       <div className="max-w-5xl w-full text-center px-6 mb-12 md:mb-24">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 text-[#2563EB] text-sm font-bold mb-8 border border-blue-100">
           <span className="animate-pulse">⏳</span> Site en construction — Belgique 🇧🇪
@@ -58,28 +89,53 @@ export default function Home() {
         </h1>
 
         <p className="text-base md:text-xl lg:text-2xl text-gray-500 mb-10 max-w-3xl mx-auto leading-relaxed font-medium">
-          Nous créons la première plateforme belge de partage d'abonnements. 
+          Nous créons la première plateforme belge de partage d'abonnements.
           Bientôt, économisez jusqu'à 75% sur Netflix, Spotify et plus encore, en toute sécurité.
         </p>
 
-        {/* Formulaire Responsive */}
-        <form className="flex flex-col sm:flex-row gap-3 justify-center items-center max-w-xl mx-auto w-full">
-          <div className="relative w-full">
-            <input
-              type="email"
-              required
-              placeholder="votre@email.be"
-              className="px-6 py-4 md:py-5 rounded-2xl border-2 border-gray-100 bg-[#FFFFFF] shadow-sm focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 focus:border-[#2563EB] w-full transition-all text-[#0F172A] font-semibold text-lg"
-            />
-          </div>
+        {/* Formulaire */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col sm:flex-row gap-3 justify-center items-center max-w-xl mx-auto w-full"
+        >
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="votre@email.be"
+            className="px-6 py-4 md:py-5 rounded-2xl border-2 border-gray-100 bg-[#FFFFFF] shadow-sm focus:outline-none focus:ring-4 focus:ring-[#2563EB]/10 focus:border-[#2563EB] w-full transition-all text-[#0F172A] font-semibold text-lg"
+            disabled={status === "loading"}
+          />
+
           <button
             type="submit"
-            className="px-8 md:px-10 py-4 md:py-5 rounded-2xl bg-[#2563EB] text-white font-bold text-lg shadow-xl shadow-[#2563EB]/25 hover:bg-[#1d4ed8] hover:-translate-y-1 transition-all active:scale-95 w-full sm:w-auto whitespace-nowrap"
+            disabled={status === "loading"}
+            className="px-8 md:px-10 py-4 md:py-5 rounded-2xl bg-[#2563EB] text-white font-bold text-lg shadow-xl shadow-[#2563EB]/25 hover:bg-[#1d4ed8] hover:-translate-y-1 transition-all active:scale-95 w-full sm:w-auto whitespace-nowrap disabled:opacity-50"
           >
-            M'avertir du lancement
+            {status === "loading" ? "Envoi..." : "M'avertir du lancement"}
           </button>
         </form>
-        
+
+        {/* Feedback */}
+        {status === "success" && (
+          <p className="mt-6 text-green-600 font-semibold">
+            ✅ Merci ! Tu seras averti du lancement.
+          </p>
+        )}
+
+        {status === "duplicate" && (
+          <p className="mt-6 text-blue-600 font-semibold">
+            ℹ️ Cet email est déjà inscrit.
+          </p>
+        )}
+
+        {status === "error" && (
+          <p className="mt-6 text-red-600 font-semibold">
+            ❌ Une erreur est survenue. Réessaie plus tard.
+          </p>
+        )}
+
         <p className="mt-6 text-sm text-gray-400 font-medium italic">
           Inscrivez-vous pour bénéficier des frais de service offerts au lancement.
         </p>
@@ -93,7 +149,7 @@ export default function Home() {
 
         .marquee-track {
           animation: scroll 45s linear infinite;
-          will-change: transform; 
+          will-change: transform;
         }
 
         .logo-card {
