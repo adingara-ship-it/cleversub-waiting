@@ -18,46 +18,51 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className="antialiased h-full">
-      <body className={`${inter.className} bg-[#FFFFFF] text-[#0F172A] flex flex-col min-h-screen`}>
-        {/* Header Responsive */}
-        <header className="w-full flex justify-center pt-10 md:pt-16 pb-4 z-20">
-          <div className="flex items-center gap-2 md:gap-3 leading-none transition-transform duration-300 cursor-pointer hover:scale-105">
-            <div className="relative w-16 h-16 md:w-20 md:h-20">
+      <body className={`${inter.className} bg-white text-[#0F172A] flex flex-col min-h-screen`}>
+
+        {/* Header */}
+        <header className="w-full flex justify-center pt-10 md:pt-14 pb-4">
+          <div className="flex items-center justify-center gap-0 leading-none">
+
+            {/* Logo — volontairement plus grand */}
+            <div className="relative w-16 h-16 md:w-18 md:h-18">
               <Image
                 src="/logosite.png"
                 alt="Cleversub Logo"
                 fill
                 priority
-                className="object-contain relative z-10"
+                className="object-contain"
               />
-              <div className="absolute inset-0 bg-[#60A5FA]/20 blur-2xl rounded-full -z-10" />
             </div>
-            
-            <span className="text-3xl md:text-5xl font-black tracking-tighter text-[#0F172A]">
+
+            {/* Texte — ajustement optique */}
+            <span className="-ml-3 md:-ml-4 text-3xl md:text-5xl font-black tracking-tighter">
               cleversub<span className="text-[#2563EB]">.</span>
             </span>
+
           </div>
         </header>
 
         {/* Contenu principal */}
-        <main className="flex-grow flex flex-col relative z-10">
+        <main className="flex-grow flex flex-col">
           {children}
         </main>
 
-        {/* Footer avec lien vers la Politique de Confidentialité */}
+        {/* Footer */}
         <footer className="py-8 text-center text-gray-400 text-xs md:text-sm font-medium flex flex-col items-center gap-2">
           <p>Fièrement propulsé depuis la Belgique 🇧🇪</p>
           <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 opacity-70">
             <span>© {new Date().getFullYear()} Cleversub.</span>
             <span className="hidden md:inline">|</span>
-            <Link 
-              href="/politique-de-confidentialite" 
+            <Link
+              href="/politique-de-confidentialite"
               className="hover:text-[#2563EB] transition-colors underline md:no-underline"
             >
               Politique de confidentialité
             </Link>
           </div>
         </footer>
+
       </body>
     </html>
   );

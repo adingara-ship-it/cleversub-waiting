@@ -73,7 +73,7 @@ export default function PrivacyPolicy() {
               À tout moment, vous pouvez demander à être retiré de notre liste d'attente.
             </p>
             <p className="mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-100 italic">
-              Pour toute demande concernant vos données, contactez-nous à : <span className="text-[#2563EB] font-bold">[TON_EMAIL_DE_CONTACT]</span>
+              Pour toute demande concernant vos données, contactez-nous à : <span className="text-[#2563EB] font-bold">[Cleversubteams@gmail.com]</span>
             </p>
           </section>
 
